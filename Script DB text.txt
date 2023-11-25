@@ -1,0 +1,148 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema sistema_polizas
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema sistema_polizas
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `sistema_polizas` DEFAULT CHARACTER SET utf8 ;
+USE `sistema_polizas` ;
+
+-- -----------------------------------------------------
+-- Table `sistema_polizas`.`usuario`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sistema_polizas`.`usuario` (
+  `identificacion` VARCHAR(12) NOT NULL,
+  `clave` VARCHAR(45) NOT NULL,
+  `nombre` VARCHAR(45) NOT NULL,
+  `telefono` VARCHAR(45) NOT NULL,
+  `correo` VARCHAR(45) NOT NULL,
+  `rol` VARCHAR(45) NULL,
+  PRIMARY KEY (`identificacion`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `sistema_polizas`.`medio_pago`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sistema_polizas`.`medio_pago` (
+  `id_medio_pago` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(150) NOT NULL,
+  `codigo` TINYINT NOT NULL,
+  `numero_tarjeta` VARCHAR(19) NOT NULL,
+  `fecha_año` TINYINT NOT NULL,
+  `fecha_mes` TINYINT NOT NULL,
+  `usuario_identificacion` VARCHAR(12) NOT NULL,
+  PRIMARY KEY (`id_medio_pago`),
+  INDEX `fk_medio_pago_usuario1_idx` (`usuario_identificacion` ASC) VISIBLE,
+  CONSTRAINT `fk_medio_pago_usuario1`
+    FOREIGN KEY (`usuario_identificacion`)
+    REFERENCES `sistema_polizas`.`usuario` (`identificacion`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `sistema_polizas`.`categoria`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sistema_polizas`.`categoria` (
+  `id_categoria` INT NOT NULL AUTO_INCREMENT,
+  `descripcion` VARCHAR(75) NOT NULL,
+  PRIMARY KEY (`id_categoria`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `sistema_polizas`.`cobertura`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sistema_polizas`.`cobertura` (
+  `id_cobertura` INT NOT NULL AUTO_INCREMENT,
+  `descripcion` VARCHAR(75) NOT NULL,
+  `costo` DOUBLE NOT NULL,
+  `id_categoria` INT NOT NULL,
+  PRIMARY KEY (`id_cobertura`, `id_categoria`),
+  INDEX `fk_cobertura_categoria1_idx` (`id_categoria` ASC) VISIBLE,
+  CONSTRAINT `fk_cobertura_categoria1`
+    FOREIGN KEY (`id_categoria`)
+    REFERENCES `sistema_polizas`.`categoria` (`id_categoria`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `sistema_polizas`.`Marca`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sistema_polizas`.`Marca` (
+  `id_marca` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`id_marca`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `sistema_polizas`.`modelo`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sistema_polizas`.`modelo` (
+  `id_modelo` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NOT NULL,
+  `imagen` LONGBLOB NOT NULL,
+  `año` YEAR NOT NULL,
+  `id_marca` INT NOT NULL,
+  PRIMARY KEY (`id_modelo`, `id_marca`),
+  INDEX `fk_modelo_Marca1_idx` (`id_marca` ASC) VISIBLE,
+  CONSTRAINT `fk_modelo_Marca1`
+    FOREIGN KEY (`id_marca`)
+    REFERENCES `sistema_polizas`.`Marca` (`id_marca`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `sistema_polizas`.`poliza`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sistema_polizas`.`poliza` (
+  `id_poliza` INT NOT NULL AUTO_INCREMENT,
+  `numero_placa` VARCHAR(10) NOT NULL,
+  `valor_asegurado` DOUBLE NOT NULL,
+  `plazo` VARCHAR(45) NOT NULL,
+  `fecha_creacion` VARCHAR(45) NOT NULL,
+  `fecha_vencimiento` VARCHAR(45) NOT NULL,
+  `usuario_identificacion` VARCHAR(12) NOT NULL,
+  `modelo_id_modelo` INT NOT NULL,
+  `modelo_id_marca` INT NOT NULL,
+  `cobertura_id_cobertura` INT NOT NULL,
+  `cobertura_id_categoria` INT NOT NULL,
+  PRIMARY KEY (`id_poliza`),
+  INDEX `fk_poliza_usuario1_idx` (`usuario_identificacion` ASC) VISIBLE,
+  INDEX `fk_poliza_modelo1_idx` (`modelo_id_modelo` ASC, `modelo_id_marca` ASC) VISIBLE,
+  INDEX `fk_poliza_cobertura1_idx` (`cobertura_id_cobertura` ASC, `cobertura_id_categoria` ASC) VISIBLE,
+  CONSTRAINT `fk_poliza_usuario1`
+    FOREIGN KEY (`usuario_identificacion`)
+    REFERENCES `sistema_polizas`.`usuario` (`identificacion`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_poliza_modelo1`
+    FOREIGN KEY (`modelo_id_modelo` , `modelo_id_marca`)
+    REFERENCES `sistema_polizas`.`modelo` (`id_modelo` , `id_marca`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_poliza_cobertura1`
+    FOREIGN KEY (`cobertura_id_cobertura` , `cobertura_id_categoria`)
+    REFERENCES `sistema_polizas`.`cobertura` (`id_cobertura` , `id_categoria`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
